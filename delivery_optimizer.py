@@ -134,7 +134,7 @@ def sorting_deliveries(delivery_list):
     
     return sorted(delivery_list, key=lambda x: (x['priority_value'], x['distance_from_warehouse'], x['location_id']))
 
-#STEP 3 : Assign deliveries to agents and balance (greedy + min-heap)
+#STEP 3 and 4: Assign deliveries to agents and balance (greedy + min-heap)
 
 def assign_deliveries_to_agents(delivery_list,num_agents=NUM_AGENTS, max_per_agent=MAX_NO_OF_DELIVERIES):
     """
@@ -227,3 +227,77 @@ def assign_deliveries_to_agents(delivery_list,num_agents=NUM_AGENTS, max_per_age
 
     return agents, agent_distances, unassigned
 
+#STEP 5: output delivery plan
+
+def write_output(agents, agent_distances, unassigned, output_path='output.txt'):
+    """
+    Write the final delivery assignment result to a text file.
+
+    This keeps the output simple and easy to read.
+    It shows each agent's deliveries, total distance,
+    any unassigned deliveries, and a small summary at the end.
+    """
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        
+        f.write("=" * 65 + "\n")
+        f.write("        DELIVERY OPTIMIZATION - AGENT ASSIGNMENT PLAN\n")
+        f.write("=" * 65 + "\n\n")
+
+        #write details for each agent
+        for agent_id in sorted(agents.keys()):
+            delivery_list= agents[agent_id]
+            total_dist= agent_distances[agent_id]
+
+            f.write(f"  AGENT {agent_id} ({len(deliveries)} deliveries | {total_dist:.2f} km total)\n")
+            f.write("  " + "-" * 60 + "\n")
+            f.write(f"  {'#':<5} {'Location ID':<15} {'Priority':<10} {'Distance (km)':<15}\n")
+            f.write("  " + "-" * 60 + "\n")
+
+            if not delivery_list:
+                f.write("  No deliveries assigned.\n")
+            else:
+                for idx,d in enumerate(delivery_list,1):
+                    priority_dispaly=d['priority'].capitalize()
+                    f.write(f"  {idx:<5} {d['location_id']:<15} {priority_dispaly:<10} {d['distance_from_warehouse']:<15.2f}\n")
+
+            f.write(" " + "-" * 60 + "\n")
+            f.write(f"  Total Distance : {total_dist:.2f} km\n")
+            f.write(f"  Total Stops    : {len(delivery_list)}\n")
+
+        #write unassigned deliveries seperately if any are left out 
+        if unassigned:
+            f.write("="*65 + "\n")
+            f.write("  UNASSIGNED DELIVERIES \n")
+            f.write("="*65 + "\n")\
+            for d in unassigned:
+                f.wrtie(f"  Location ID: {d['location_id']} | Priority: {d['priority'].capitalize()} | Distance: {d['distance_from_warehouse']:.2f} km\n")
+            f.write("\n" )
+
+        #summary section
+        all_distances= list(agent_distances.values())
+        max_dist=max(all_distances) 
+        min_dist=min(all_distances)
+        imbalance= max_dist - min_dist
+        total=sum(all_distances)
+
+        f.write("=" * 65 + "\n")
+        f.write("  SUMMARY\n")
+        f.write("=" * 65 + "\n")
+        f.write(f"  Total Deliveries Assigned : {sum(len(v) for v in agents.values())}\n")
+        f.write(f"  Unassigned Deliveries     : {len(unassigned)}\n")
+        f.write(f"  Combined Distance         : {total:.2f} km\n")
+        f.write(f"  Max Agent Distance        : {max_dist:.2f} km\n")
+        f.write(f"  Min Agent Distance        : {min_dist:.2f} km\n")
+        f.write(f"  Load Imbalance            : {imbalance:.2f} km\n")
+
+        #simple warning if distance split is too uneven
+        if total>0 and (imbalance/total)>0.3:
+            f.write("\n  Warning: load distribution is a bit uneven.\n")
+            f.write("  This may be because of very long-distance deliveries\n")
+            f.write("  or too many important deliveries in the same area.\n")
+
+        f.write("\n" + "=" * 65 + "\n")
+
+        
+        
