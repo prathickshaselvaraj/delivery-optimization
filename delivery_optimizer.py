@@ -38,7 +38,7 @@ def read_csv(filepath):
     delivery_list=[] # to store the list of deliveries read from the csv file
     ids_done=set() #to track duplicate location ids
 
-    with open(filepath,'r', newline='' , enoding='utf-8') as f:
+    with open(filepath,'r', newline='' , encoding='utf-8') as f:
         reader=csv.DictReader(f)
 
         if not reader.fieldnames: # if missing columns 
@@ -46,7 +46,7 @@ def read_csv(filepath):
         
         fields_normalization= [col.strip().lower() for col in reader.fieldnames]
 
-        needed_fields={'location_id ','distance_from_warehouse','priority'}
+        needed_fields = {'location_id', 'distance_from_warehouse', 'delivery_priority'}
 
         missing= needed_fields - set(fields_normalization)
 
@@ -59,7 +59,7 @@ def read_csv(filepath):
             row={k.strip().lower(): v.strip() for k,v in raw_row.items()}
 
             #location _ id 
-            location_id= row.get('location_id,'').strip()')
+            location_id= row.get('location_id','').strip()
             if not location_id:
                 print(f"[SKIP] Row {num} : Empty location_id.")
                 continue
@@ -90,7 +90,7 @@ def read_csv(filepath):
                 print(f"[WARNING] Row {num} : Distance is 0. Location is same as warehouse.Keeping")
                 
             #about priority
-            raw_priority=row.get('priority','').strip().lower()
+            raw_priority = row.get('delivery_priority', '').strip().lower()
 
             #if prioty is missing or unknown, default to low and give warning
             if not raw_priority:
@@ -103,7 +103,7 @@ def read_csv(filepath):
             delivery_list.append({
                 'location_id': location_id,
                 'distance_from_warehouse': distance,
-                'priority': raw_priority
+                'priority': raw_priority,
                 'priority_value': priority_map[raw_priority]
             # this is why we use map : for priority value to be used in sorting numbers in faster and cleaner than sorting string"
             })
@@ -202,7 +202,7 @@ def assign_deliveries_to_agents(delivery_list,num_agents=NUM_AGENTS, max_per_age
             if not assigned:
 
                 # all agents are full
-                printf(f"[WARNING] All agents have reached the maximum delivery limit.( {max_per_agent})."
+                print(f"[WARNING] All agents have reached the maximum delivery limit.( {max_per_agent})."
                        f"Delivery '{delivery['location_id']}' is UNASSIGNED.")
                 unassigned.append(delivery)
 
@@ -249,7 +249,7 @@ def write_output(agents, agent_distances, unassigned, output_path='output.txt'):
             delivery_list= agents[agent_id]
             total_dist= agent_distances[agent_id]
 
-            f.write(f"  AGENT {agent_id} ({len(deliveries)} deliveries | {total_dist:.2f} km total)\n")
+            f.write(f"  AGENT {agent_id} ({len(delivery_list)} deliveries | {total_dist:.2f} km total)\n")
             f.write("  " + "-" * 60 + "\n")
             f.write(f"  {'#':<5} {'Location ID':<15} {'Priority':<10} {'Distance (km)':<15}\n")
             f.write("  " + "-" * 60 + "\n")
@@ -269,9 +269,9 @@ def write_output(agents, agent_distances, unassigned, output_path='output.txt'):
         if unassigned:
             f.write("="*65 + "\n")
             f.write("  UNASSIGNED DELIVERIES \n")
-            f.write("="*65 + "\n")\
+            f.write("="*65 + "\n")
             for d in unassigned:
-                f.wrtie(f"  Location ID: {d['location_id']} | Priority: {d['priority'].capitalize()} | Distance: {d['distance_from_warehouse']:.2f} km\n")
+                f.write(f"  Location ID: {d['location_id']} | Priority: {d['priority'].capitalize()} | Distance: {d['distance_from_warehouse']:.2f} km\n")
             f.write("\n" )
 
         #summary section
@@ -321,7 +321,7 @@ def main():
         sorted_list=sorting_deliveries(delivery_list)
         print(f"           Done.First 5 deliveries after soritng:")
         for d in sorted_list[:5]:
-            print(f"           {d[location_id]} | {d['priority'].capitalize()} | {d['distance_from_warehouse']} km")
+            print(f"           {d['location_id']} | {d['priority'].capitalize()} | {d['distance_from_warehouse']} km")
         print()
 
         #step 3 & 4: Assign+balance

@@ -1,0 +1,51 @@
+=================================================================
+        DELIVERY OPTIMIZATION - AGENT ASSIGNMENT PLAN
+=================================================================
+
+  AGENT 1 (6 deliveries | 42.10 km total)
+  ------------------------------------------------------------
+  #     Location ID     Priority   Distance (km)  
+  ------------------------------------------------------------
+  1     LOC003          High       3.10           
+  2     LOC005          High       7.40           
+  3     LOC015          Medium     4.40           
+  4     LOC006          Medium     9.00           
+  5     LOC010          Low        2.90           
+  6     LOC007          Low        15.30          
+ ------------------------------------------------------------
+  Total Distance : 42.10 km
+  Total Stops    : 6
+  AGENT 2 (5 deliveries | 69.30 km total)
+  ------------------------------------------------------------
+  #     Location ID     Priority   Distance (km)  
+  ------------------------------------------------------------
+  1     LOC001          High       5.20           
+  2     LOC014          High       8.80           
+  3     LOC012          Medium     6.60           
+  4     LOC009          Medium     18.70          
+  5     LOC013          Low        30.00          
+ ------------------------------------------------------------
+  Total Distance : 69.30 km
+  Total Stops    : 5
+  AGENT 3 (4 deliveries | 51.60 km total)
+  ------------------------------------------------------------
+  #     Location ID     Priority   Distance (km)  
+  ------------------------------------------------------------
+  1     LOC008          High       5.20           
+  2     LOC011          High       11.10          
+  3     LOC002          Medium     12.80          
+  4     LOC004          Low        22.50          
+ ------------------------------------------------------------
+  Total Distance : 51.60 km
+  Total Stops    : 4
+=================================================================
+  SUMMARY
+=================================================================
+  Total Deliveries Assigned : 15
+  Unassigned Deliveries     : 0
+  Combined Distance         : 163.00 km
+  Max Agent Distance        : 69.30 km
+  Min Agent Distance        : 42.10 km
+  Load Imbalance            : 27.20 km
+
+=================================================================
