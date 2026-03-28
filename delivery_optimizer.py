@@ -98,4 +98,14 @@ def read_csv(filepath):
                 print(f"[WARN] Row {num} ({location_id}): Unknown priority '{raw_priority}'. Defaulting to 'low'.")
                 raw_priority='low'
 
-            
+            delivery_list.append({
+                'location_id': location_id,
+                'distance_from_warehouse': distance,
+                'priority': raw_priority
+                'priority_value': priority_map[raw_priority]
+            # this is why we use map : for priority value to be used in sorting numbers in faster and cleaner than sorting string"
+            })
+
+        if not delivery_list:
+            raise ValueError("[ERROR] No valid delivery entries found after validation")
+    return delivery_list
