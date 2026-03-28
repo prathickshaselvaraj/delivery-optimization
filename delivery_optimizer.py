@@ -12,6 +12,8 @@ priority_map= {'high' : 1, 'medium' : 2, 'low' : 3}
 num_agents=3  #initialize no of agents(may change later)
 max_no_of_deliveries= None # for now 
 
+#STEP 1: Read and validate the CSV file, then create a list of deliveries with their details.
+
 def read_csv(filepath):
     """
 
@@ -109,3 +111,26 @@ def read_csv(filepath):
         if not delivery_list:
             raise ValueError("[ERROR] No valid delivery entries found after validation")
     return delivery_list
+
+# STEP 2: Sort the deliveries based on priority and distance.
+
+def sorting_deliveries(delivery_list):
+    """
+    Sort deliveries based on priority first, then distance.
+
+    - High priority deliveries go first, Low go last.
+    - If two deliveries have the same priority, the nearer one is chosen.
+
+    Using Python's built-in sorted() with a tuple key makes this simple and efficient.
+
+    Other approaches like Bubble Sort are too slow (O(n²)),
+    and Counting Sort doesn't work here since distance values are floats.
+
+    Handled cases:
+    - If all deliveries have same priority → sorted by distance
+    - If both priority and distance are same → use location_id to keep order consistent
+    - If all distances are same → sorted only by priority
+    """
+    
+    return sorted(delivery_list, key=lambda x: (x['priority_value'], x['distance_from_warehouse'], x['location_id']))
+
