@@ -67,6 +67,24 @@ def read_csv(filepath):
                 continue
             ids_done.add(location_id)
 
-            
+            #distance from warehouse
+            raw_dist=row.get('distance_from_warehouse','').strip()
+            if not raw_dist:
+                print(f"[SKIP] Row {num} : Missing distance.")
+                continue
+            try:
+                distance= float(raw_dist)
+            except ValueError:
+                print(f"[SKIP] Row {num} : Invalid distance value '{raw_dist}'.")
+                continue
+
+            #if distance is negative
+            if distance < 0:
+                print(f"[SKIP] Row {num} : Negative distance '{distance}'.Not Valid.")
+                continue
+
+            # if distance is same as warehouse or equal to 0
+            if distance == 0:
+                print(f"[WARNING] Row {num} : Distance is 0. Location is same as warehouse.Keeping")
                 
             
