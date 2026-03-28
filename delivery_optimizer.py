@@ -87,4 +87,15 @@ def read_csv(filepath):
             if distance == 0:
                 print(f"[WARNING] Row {num} : Distance is 0. Location is same as warehouse.Keeping")
                 
+            #about priority
+            raw_priority=row.get('priority','').strip().lower()
+
+            #if prioty is missing or unknown, default to low and give warning
+            if not raw_priority:
+                print(f"[WARN] Row {num} ({location_id}): Missing priority. Defaulting to 'low'.")
+                raw_priority='low'
+            if raw_priority not in priority_map:
+                print(f"[WARN] Row {num} ({location_id}): Unknown priority '{raw_priority}'. Defaulting to 'low'.")
+                raw_priority='low'
+
             
