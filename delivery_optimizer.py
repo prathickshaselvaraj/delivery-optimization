@@ -9,8 +9,8 @@ import heapq
 priority_map= {'high' : 1, 'medium' : 2, 'low' : 3}
 
 
-num_agents=3  #initialize no of agents(may change later)
-max_no_of_deliveries= None # for now 
+NUM_AGENTS=3  #initialize no of agents(may change later)
+MAX_NO_OF_DELIVERIES= None # for now 
 
 #STEP 1: Read and validate the CSV file, then create a list of deliveries with their details.
 
@@ -133,4 +133,97 @@ def sorting_deliveries(delivery_list):
     """
     
     return sorted(delivery_list, key=lambda x: (x['priority_value'], x['distance_from_warehouse'], x['location_id']))
+
+#STEP 3 : Assign deliveries to agents and balance (greedy + min-heap)
+
+def assign_deliveries_to_agents(delivery_list,num_agents=NUM_AGENTS, max_per_agent=MAX_NO_OF_DELIVERIES):
+    """
+    Assign deliveries to agents while keeping their total travel distance balanced.
+
+    Approach:
+    - Always assign the next delivery to the agent with the least current distance.
+    - A min-heap helps quickly find that agent.
+
+    Why this approach?
+    - It keeps the workload fairly balanced without overcomplicating things.
+    - Using a heap avoids checking all agents every time, so it's efficient.
+
+    Why not simpler methods?
+    - Round Robin doesn’t consider distance, so one agent might get longer routes.
+    - Advanced optimization (like ILP) is unnecessary for just a few agents.
+
+    Handled scenarios:
+    - If deliveries are fewer than agents → some agents may stay idle
+    - If priorities or distances are similar → still distributes fairly
+    - If one delivery is very far → slight imbalance is expected and noted
+    """
+
+    # Entries in the heap : (total_distance, agent_id, delivery_count)
+    # Total distance is the sort key -> agent with least load is always at top
+
+    heap = [(0.0, agent_id, 0) for agent_id in range(1, num_agents + 1)]
+    heapq.heapify(heap)
+
+    agents= defaultdict(list)
+    agent_distances= defaultdict(float)
+    unassigned=[]
+
+    for delivery in delivery_list:
+
+        if max_per_agent:
+
+            # find the agent under limit 
+
+            # skip agents who are full
+
+            skipped=[]
+            assigned=False
+
+            while heap:
+                total_dist, agent_id, count = heapq.heappop(heap)
+
+                if count < max_per_agent:
+                    # this agent has capacity, assign delivery
+
+                    agents[agent_id].append(delivery)
+                    new_dist= total_dist + delivery['distance_from_warehouse']
+                    agent_distances[agent_id]= new_dist
+                    heapq.heappush(heap, (new_dist, agent_id, count + 1))
+
+                    #restore skipped agents back to heap
+                    for item in skipped:
+                        heapq.heappush(heap, item)
+
+                    assigned=True
+                    break
+                else:
+                    skipped.append((total_dist, agent_id, count))
+
+            if not assigned:
+
+                # all agents are full
+                printf(f"[WARNING] All agents have reached the maximum delivery limit.( {max_per_agent})."
+                       f"Delivery '{delivery['location_id']}' is UNASSIGNED.")
+                unassigned.append(delivery)
+
+                #restore heap
+
+                for item in skipped:
+                    heapq.heappush(heap, item)
+
+        else:
+
+            #no limit - assign to least - loaded agent 
+
+            total_dist, agent_id, count = heapq.heappop(heap)
+            agents[agent_id].append(delivery)
+            new_dist= total_dist + delivery['distance_from_warehouse']
+            agent_distances[agent_id]= new_dist
+            heapq.heappush(heap, (new_dist, agent_id, count + 1))
+
+    for agent_id in range(1, num_agents + 1):
+        if agent_id not in agent_distances:
+            agent_distances[agent_id]=0.0
+
+    return agents, agent_distances, unassigned
 
