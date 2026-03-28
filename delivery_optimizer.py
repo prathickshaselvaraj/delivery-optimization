@@ -42,7 +42,19 @@ def read_csv(filepath):
         if not reader.fieldnames: # if missing columns 
             raise ValueError("[ERROR] CSV has no header row.")
         
+        fields_normalization= [col.strip().lower() for col in reader.fieldnames]
+
+        needed_fields={'location_id ','distance_from_warehouse','priority'}
+
+        missing= needed_fields - set(fields_normalization)
+
+        if missing:
+            raise ValueError(f"[ERROR] CSV required missing columns : {missing}")
         
+        for num, raw_row in enumerate(reader, start=2): # start=2 to account for header row
+            #normalizing all values by stripping and lowercasing
+
+            row={k.strip().lower(): v.strip() for k,v in raw_row.items()}
 
             
 
