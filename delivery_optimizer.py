@@ -299,5 +299,53 @@ def write_output(agents, agent_distances, unassigned, output_path='output.txt'):
 
         f.write("\n" + "=" * 65 + "\n")
 
-        
-        
+
+def main():
+    print("\n" + "="*50)
+    print("     DELIVERY OPTIMMIZATION SYSTEM ")
+    print("=" * 50 +"\n")
+
+    #allow cli agruments : python delivery_oprtimizer.py input.csv 
+
+    csv_path = sys.argv[1] if len(sys.argv) > 1 else 'input.csv'
+    output_path= sys.argv[2] if len(sys.argv) > 2 else 'output.txt'
+
+    try:
+        # Step 1: Read CSV
+        print(f"[Step 1/4] Reading CSV: '{csv_path}'")
+        delivery_list = read_csv(csv_path)
+        print(f"           Done. {len(delivery_list)} valid deliveries loaded.\n")
+
+        #step 2: sort deliveries
+        print("[Step 2/4] Sorting deliveries by priority and distance...")
+        sorted_list=sorting_deliveries(delivery_list)
+        print(f"           Done.First 5 deliveries after soritng:")
+        for d in sorted_list[:5]:
+            print(f"           {d[location_id]} | {d['priority'].capitalize()} | {d['distance_from_warehouse']} km")
+        print()
+
+        #step 3 & 4: Assign+balance
+        print("[Step 3/4] Assigning deliveries to agents...")
+        agents, agent_distances, unassigned = assign_deliveries_to_agents(sorted_list)
+        for agent_id in sorted(agents.keys()):
+            print(f"           Agent {agent_id}: {len(agents[agent_id])} deliveries | {agent_distances[agent_id]:.2f} km")
+        if unassigned:
+            print(f"           WARNING: {len(unassigned)} deliveries could not be assigned.")
+        print()
+
+        #step 5 : write out 
+        print(f"[Step 4/4] Writing output to '{output_path}'...")
+        write_output(agents, agent_distances, unassigned, output_path)
+        print(f"           Done.\n")
+
+        print("=" * 50)
+        print(f"  Output saved to: {output_path}")
+        print("=" * 50 + "\n")
+    
+    except (FileNotFoundError, ValueError) as e:
+        print(f"\n{e}")
+        print("Please fix the issue and try again.\n")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
