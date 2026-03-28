@@ -1,0 +1,16 @@
+location_id,distance_from_warehouse,delivery_priority
+LOC001,5.2,High
+LOC002,12.8,Medium
+LOC003,3.1,High
+LOC004,22.5,Low
+LOC005,7.4,High
+LOC006,9.0,Medium
+LOC007,15.3,Low
+LOC008,5.2,High
+LOC009,18.7,Medium
+LOC010,2.9,Low
+LOC011,11.1,High
+LOC012,6.6,Medium
+LOC013,30.0,Low
+LOC014,8.8,High
+LOC015,4.4,Medium
