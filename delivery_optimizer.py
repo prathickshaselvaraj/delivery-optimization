@@ -56,7 +56,16 @@ def read_csv(filepath):
 
             row={k.strip().lower(): v.strip() for k,v in raw_row.items()}
 
-            
+            #location _ id 
+            location_id= row.get('location_id,'').strip()')
+            if not location_id:
+                print(f"[SKIP] Row {num} : Empty location_id.")
+                continue
+
+            if location_id in ids_done:
+                print(f"[WARNING] Row {num} : Duplicate location_id '{location_id}'.Skipping duplicate.")
+                continue
+            ids_done.add(location_id)
 
             
                 
