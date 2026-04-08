@@ -1,4 +1,4 @@
-from app import sorting_deliveries
+from delivery_optimizer import sorting_deliveries
 
 def test_sorting_basic():
     data = [
