@@ -43,7 +43,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+                withSonarQubeEnv('My Sonar Server'){
                     sh """
                         sonar-scanner \
                           -Dsonar.projectKey=delivery-optimization \
