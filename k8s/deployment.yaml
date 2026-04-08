@@ -17,21 +17,9 @@ spec:
     spec:
       containers:
         - name: delivery-optimization
-          image: your-dockerhub-username/delivery-optimization:IMAGE_TAG
+          image: prathicksha15/delivery-optimization:IMAGE_TAG
           ports:
-            - containerPort: 3000
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 15
-            periodSeconds: 20
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            - containerPort: 5000
           resources:
             requests:
               memory: "128Mi"
@@ -51,5 +39,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 5000
   type: ClusterIP
