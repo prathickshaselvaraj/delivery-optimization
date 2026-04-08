@@ -96,7 +96,7 @@ pipeline {
 
     post {
         always {
-            sh "docker rmi ${DOCKER_IMAGE}:${IMAGE_TAG} || true"
+            sh "docker rmi prathicksha15/delivery-optimization:${BUILD_NUMBER} || true"
             cleanWs()
         }
     }
