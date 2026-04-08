@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-optimization
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: delivery-optimization
+  template:
+    metadata:
+      labels:
+        app: delivery-optimization
+    spec:
+      containers:
+      - name: delivery-optimization
+        image: yourdockerhubusername/delivery-optimization:latest
+        ports:
+        - containerPort: 8000
