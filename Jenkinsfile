@@ -52,7 +52,7 @@ pipeline {
                           -Dsonar.exclusions=tests/**,venv/** \
                           -Dsonar.python.coverage.reportPaths=coverage.xml \
                           -Dsonar.host.url=${SONAR_URL} \
-                          -Dsonar.token=${SONAR_TOKEN}
+                          -Dsonar.login=${SONAR_TOKEN}
                     """
                 }
             }
@@ -61,7 +61,12 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted: Quality Gate failed with status: ${qg.status}"
+                        }
+                    }
                 }
             }
         }
@@ -83,12 +88,9 @@ pipeline {
                 sh """
                     git clone https://github.com/prathickshaselvaraj/delivery-optimization-gitops.git
                     cd delivery-optimization-gitops/k8s
-
                     sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|g" deployment.yaml
-
                     git config user.email "jenkins@example.com"
                     git config user.name "jenkins"
-
                     git add deployment.yaml
                     git commit -m "Update image to ${IMAGE_TAG}"
                     git push
