@@ -4,10 +4,7 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS = credentials('dockerhub-credentials')
         SONAR_TOKEN        = credentials('sonarqube-token')
-        GITOPS_TOKEN       = credentials('github-token')
-
         DOCKER_IMAGE       = "prathicksha15/delivery-optimization"
-        GITOPS_REPO_NAME   = "delivery-optimization"
         IMAGE_TAG          = "${env.BUILD_NUMBER}"
         SONAR_URL          = "http://localhost:9000"
     }
@@ -74,12 +71,11 @@ pipeline {
             steps {
                 sh """
                     docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
-                    docker tag  ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
+                    docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
                     echo ${DOCKER_CREDENTIALS_PSW} | docker login \
                         -u ${DOCKER_CREDENTIALS_USR} --password-stdin
                     docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
                     docker push ${DOCKER_IMAGE}:latest
-                    echo "✅ Image pushed: ${IMAGE_TAG}"
                 """
             }
         }
@@ -89,7 +85,6 @@ pipeline {
                 sh """
                     sed -i 's|IMAGE_TAG|${IMAGE_TAG}|g' k8s/deployment.yaml
                     kubectl apply -f k8s/deployment.yaml
-                    echo "✅ Deployed to Kubernetes"
                 """
             }
         }
@@ -97,7 +92,7 @@ pipeline {
 
     post {
         success {
-            echo "🎉 Pipeline PASSED — ${DOCKER_IMAGE}:${IMAGE_TAG} deployed!"
+            echo "🎉 Pipeline PASSED!"
         }
         failure {
             echo "❌ Pipeline FAILED — check logs above"
