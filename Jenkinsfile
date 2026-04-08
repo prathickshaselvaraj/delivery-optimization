@@ -43,14 +43,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('My Sonar Server'){
-                    sh """
+                withSonarQubeEnv('My Sonar Server') {
+                    sh '''
                         sonar-scanner \
                           -Dsonar.projectKey=delivery-optimization \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=${SONAR_URL} \
-                          -Dsonar.token=${SONAR_TOKEN}
-                    """
+                          -Dsonar.tests=tests \
+                          -Dsonar.exclusions=tests/**,venv/** \
+                          -Dsonar.host.url=$SONAR_URL \
+                          -Dsonar.token=$SONAR_TOKEN
+                    '''
                 }
             }
         }
@@ -65,38 +67,38 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-                sh """
-                    docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
-                    docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
-                    echo ${DOCKER_CREDENTIALS_PSW} | docker login -u ${DOCKER_CREDENTIALS_USR} --password-stdin
-                    docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
-                    docker push ${DOCKER_IMAGE}:latest
-                """
+                sh '''
+                    docker build -t $DOCKER_IMAGE:$IMAGE_TAG .
+                    docker tag $DOCKER_IMAGE:$IMAGE_TAG $DOCKER_IMAGE:latest
+                    echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin
+                    docker push $DOCKER_IMAGE:$IMAGE_TAG
+                    docker push $DOCKER_IMAGE:latest
+                '''
             }
         }
 
         stage('Update GitOps Repo') {
             steps {
-                sh """
+                sh '''
                     git clone https://github.com/prathickshaselvaraj/delivery-optimization-gitops.git
                     cd delivery-optimization-gitops/k8s
 
-                    sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|g" deployment.yaml
+                    sed -i "s|image: .*|image: $DOCKER_IMAGE:$IMAGE_TAG|g" deployment.yaml
 
                     git config user.email "jenkins@example.com"
                     git config user.name "jenkins"
 
                     git add deployment.yaml
-                    git commit -m "Update image to ${IMAGE_TAG}"
+                    git commit -m "Update image to $IMAGE_TAG"
                     git push
-                """
+                '''
             }
         }
     }
 
     post {
         always {
-            sh "docker rmi prathicksha15/delivery-optimization:${BUILD_NUMBER} || true"
+            sh "docker rmi $DOCKER_IMAGE:$IMAGE_TAG || true"
             cleanWs()
         }
     }
