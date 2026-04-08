@@ -14,7 +14,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo "✅ Code checked out"
             }
         }
 
@@ -25,7 +24,6 @@ pipeline {
                     venv/bin/pip install --upgrade pip
                     venv/bin/pip install -r requirements.txt
                 '''
-                echo "Build complete."
             }
         }
 
@@ -49,9 +47,7 @@ pipeline {
                     sh """
                         sonar-scanner \
                           -Dsonar.projectKey=delivery-optimization \
-                          -Dsonar.sources=src \
-                          -Dsonar.language=py \
-                          -Dsonar.python.version=3 \
+                          -Dsonar.sources=. \
                           -Dsonar.host.url=${SONAR_URL} \
                           -Dsonar.token=${SONAR_TOKEN}
                     """
@@ -72,31 +68,33 @@ pipeline {
                 sh """
                     docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
                     docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
-                    echo ${DOCKER_CREDENTIALS_PSW} | docker login \
-                        -u ${DOCKER_CREDENTIALS_USR} --password-stdin
+                    echo ${DOCKER_CREDENTIALS_PSW} | docker login -u ${DOCKER_CREDENTIALS_USR} --password-stdin
                     docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
                     docker push ${DOCKER_IMAGE}:latest
                 """
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Update GitOps Repo') {
             steps {
                 sh """
-                    sed -i 's|IMAGE_TAG|${IMAGE_TAG}|g' k8s/deployment.yaml
-                    kubectl apply -f k8s/deployment.yaml
+                    git clone https://github.com/prathickshaselvaraj/delivery-optimization-gitops.git
+                    cd delivery-optimization-gitops/k8s
+
+                    sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|g" deployment.yaml
+
+                    git config user.email "jenkins@example.com"
+                    git config user.name "jenkins"
+
+                    git add deployment.yaml
+                    git commit -m "Update image to ${IMAGE_TAG}"
+                    git push
                 """
             }
         }
     }
 
     post {
-        success {
-            echo "🎉 Pipeline PASSED!"
-        }
-        failure {
-            echo "❌ Pipeline FAILED — check logs above"
-        }
         always {
             sh "docker rmi ${DOCKER_IMAGE}:${IMAGE_TAG} || true"
             cleanWs()
