@@ -78,23 +78,21 @@ pipeline {
         }
 
         stage('Update GitOps Repo') {
-            steps {
-                // ✅ github-token credential injected safely for authenticated push
-                withCredentials([string(credentialsId: 'github-token', variable: 'GIT_TOKEN')]) {
-                    sh '''
-                        rm -rf delivery-optimization-gitops
-                        git clone https://prathickshaselvaraj:$GIT_TOKEN@github.com/prathickshaselvaraj/delivery-optimization-gitops.git
-                        cd delivery-optimization-gitops/k8s
-                        sed -i "s|image: .*|image: $DOCKER_IMAGE:$IMAGE_TAG|g" deployment.yaml
-                        git config user.email "jenkins@example.com"
-                        git config user.name "jenkins"
-                        git add deployment.yaml
-                        git commit -m "Update image to $IMAGE_TAG" || echo "No changes to commit"
-                        git push https://prathickshaselvaraj:$GIT_TOKEN@github.com/prathickshaselvaraj/delivery-optimization-gitops.git main
-                    '''
-                }
-            }
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+            sh """
+                git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/prathickshaselvaraj/delivery-optimization-gitops.git
+                cd delivery-optimization-gitops/k8s
+                sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|g" deployment.yaml
+                git config user.email "jenkins@example.com"
+                git config user.name "jenkins"
+                git add deployment.yaml
+                git commit -m "Update image to ${IMAGE_TAG}"
+                git push
+            """
         }
+    }
+}
     }
 
     post {
